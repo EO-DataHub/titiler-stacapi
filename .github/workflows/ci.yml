@@ -5,29 +5,28 @@ on:
   workflow_dispatch:
   push:
     branches:
-    - main
-    - develop
+      - main
+      - develop
     tags:
-    - '*'
+      - "*"
     paths:
       # Only run test and docker publish if some code have changed
-      - 'pyproject.toml'
-      - 'titiler/**'
-      - '.pre-commit-config.yaml'
-      - '.github/workflows/ci.yml'
+      - "pyproject.toml"
+      - "titiler/**"
+      - ".pre-commit-config.yaml"
+      - ".github/workflows/ci.yml"
 
   # Run tests on pull requests.
   pull_request:
 env:
-  LATEST_PY_VERSION: '3.12'
-
+  LATEST_PY_VERSION: "3.12"
 
 jobs:
   tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
 
     steps:
       - uses: actions/checkout@v4
@@ -132,7 +131,7 @@ jobs:
         with:
           platforms: linux/amd64
           context: .
-          file: dockerfiles/Dockerfile
+          file: Dockerfile
           push: true
           tags: |
             ghcr.io/developmentseed/titiler-stacapi:latest
@@ -144,7 +143,7 @@ jobs:
         with:
           platforms: linux/amd64
           context: .
-          file: dockerfiles/Dockerfile
+          file: Dockerfile
           push: true
           tags: |
             ghcr.io/developmentseed/titiler-stacapi:${{ steps.tag.outputs.version }}

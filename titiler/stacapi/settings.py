@@ -1,5 +1,6 @@
 """API settings."""
 
+import os
 from typing import Optional
 
 from pydantic import Field, field_validator, model_validator
@@ -13,7 +14,7 @@ class ApiSettings(BaseSettings):
     name: str = "titiler-stacapi"
     cors_origins: str = "*"
     cachecontrol: str = "public, max-age=3600"
-    root_path: str = ""
+    root_path: str =  os.getenv("TITILER_STACAPI_ROOT_PATH", "")
     debug: bool = False
     template_directory: Optional[str] = None
 
