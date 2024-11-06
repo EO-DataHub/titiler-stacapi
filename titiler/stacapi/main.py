@@ -4,6 +4,7 @@
 from typing import Any, Dict, List, Optional
 
 import jinja2
+import os
 from fastapi import Depends, FastAPI
 from fastapi.responses import ORJSONResponse
 from starlette.middleware.cors import CORSMiddleware
@@ -11,6 +12,8 @@ from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 from typing_extensions import Annotated
 
+from pystac_client import ItemSearch
+from pystac_client.stac_api_io import StacApiIO
 from titiler.core.errors import DEFAULT_STATUS_CODES, add_exception_handlers
 from titiler.core.factory import AlgorithmFactory, MultiBaseTilerFactory, TMSFactory
 from titiler.core.middleware import CacheControlMiddleware, LoggerMiddleware
@@ -26,7 +29,8 @@ from titiler.stacapi.settings import ApiSettings, STACAPISettings
 from titiler.stacapi.utils import create_html_response
 
 settings = ApiSettings()
-stacapi_config = STACAPISettings()
+stac_api_url = os.getenv("TITILER_STACAPI_STAC_API_URL", "https://dev.eodatahub.org.uk/api/catalogue/stac/")
+stacapi_config = STACAPISettings(stac_api_url=stac_api_url)
 
 # custom template directory
 templates_location: List[Any] = (
@@ -146,6 +150,48 @@ app.include_router(algorithms.router, tags=["Algorithms"])
 def ping() -> Dict:
     """Health check."""
     return {"Howdy": "Let's make happy tiles"}
+
+
+###############################################################################
+# Test get_assets
+@app.get("/get_assets", description="Get Assets", tags=["Get Assets"])
+def get_assets() -> Dict:
+    params = {
+        "collections": ["sentinel2_ard"],
+        "datetime": "2023-09-03T00:00:00Z/2023-09-04T00:00:00Z",
+        "intersects": {
+            "type": "Polygon",
+            "coordinates": [
+                [
+                    (0.0, 48.92249926375824),
+                    (11.249999999999993, 48.92249926375824),
+                    (11.249999999999993, 55.77657301866769),
+                    (0.0, 55.77657301866769),
+                    (0.0, 48.92249926375824),
+                ]
+            ],
+        },
+        "fields": ["assets", "id", "bbox", "collection"],
+    }
+    stac_api_io = StacApiIO()
+
+    catalog_url = "https://dev.eodatahub.org.uk/api/catalogue/stac/catalogs/supported-datasets/ceda-stac-catalogue/"
+
+    results = ItemSearch(
+        f"{catalog_url}/search",
+        method="POST",
+        stac_io=stac_api_io,
+        collections=params["collections"],
+        datetime=params["datetime"],
+        intersects=params["intersects"],
+        fields=params["fields"],
+    )
+    try:
+        a = list(results.items_as_dicts())
+        print(a)
+        return {"status": "success", "data": a}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 
 
 ###############################################################################

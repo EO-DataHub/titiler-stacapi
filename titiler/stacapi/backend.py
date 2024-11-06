@@ -178,10 +178,10 @@ class STACAPIBackend(BaseBackend):
         """This method is not used but is required by the abstract class."""
         pass
 
-    def assets_for_tile(self, x: int, y: int, z: int, **kwargs: Any) -> List[Dict]:
+    def assets_for_tile(self, catalog_url, x: int, y: int, z: int, **kwargs: Any) -> List[Dict]:
         """Retrieve assets for tile."""
         bbox = self.tms.bounds(Tile(x, y, z))
-        return self.get_assets(Polygon.from_bounds(*bbox), **kwargs)
+        return self.get_assets(catalog_url, Polygon.from_bounds(*bbox), **kwargs)
 
     def assets_for_point(
         self,
@@ -219,18 +219,20 @@ class STACAPIBackend(BaseBackend):
 
         return self.get_assets(Polygon.from_bounds(xmin, ymin, xmax, ymax), **kwargs)
 
-    @cached(  # type: ignore
+    @cached(
         TTLCache(maxsize=cache_config.maxsize, ttl=cache_config.ttl),
-        key=lambda self, geom, search_query, **kwargs: hashkey(
+        key=lambda self, catalog_url, geom, search_query=None, fields=None: hashkey(
             self.url,
+            catalog_url,
             str(geom),
-            json.dumps(search_query),
-            json.dumps(self.headers),
-            **kwargs,
+            json.dumps(search_query or {}, sort_keys=True),
+            tuple(fields) if fields else (),
+            json.dumps(self.headers, sort_keys=True),
         ),
     )
     def get_assets(
         self,
+        catalog_url,
         geom: Geometry,
         search_query: Optional[Dict] = None,
         fields: Optional[List[str]] = None,
@@ -255,7 +257,8 @@ class STACAPIBackend(BaseBackend):
         params.pop("bbox", None)
 
         results = ItemSearch(
-            f"{self.url}/search",
+            f"{catalog_url}/search",
+            method="POST",
             stac_io=stac_api_io,
             **params,
         )
@@ -267,6 +270,7 @@ class STACAPIBackend(BaseBackend):
 
     def tile(
         self,
+        catalog_url: str,
         tile_x: int,
         tile_y: int,
         tile_z: int,
@@ -278,6 +282,7 @@ class STACAPIBackend(BaseBackend):
 
         with Timer() as t:
             mosaic_assets = self.assets_for_tile(
+                catalog_url,
                 tile_x,
                 tile_y,
                 tile_z,
