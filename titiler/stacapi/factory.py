@@ -49,7 +49,7 @@ from titiler.stacapi.backend import STACAPIBackend
 from titiler.stacapi.dependencies import APIParams, STACApiParams, STACSearchParams
 from titiler.stacapi.models import FeatureInfo, LayerDict
 from titiler.stacapi.settings import CacheSettings, RetrySettings
-from titiler.stacapi.utils import _tms_limits, decode_catalog_url
+from titiler.stacapi.utils import _tms_limits
 
 cache_config = CacheSettings()
 retry_config = RetrySettings()
