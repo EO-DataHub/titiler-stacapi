@@ -868,7 +868,7 @@ class OGCWMTSFactory(BaseTilerFactory):
         @self.router.get(
             # For this to work with third party apps, we need to pass it as part of the path.
             # Otherwise, come the GetTile, it will have automatically removed the catalog url.
-            "/{catalog_base64:path}/wmts",
+            "/{catalog_path:path}/wmts",
             response_class=Response,
             responses={
                 200: {
@@ -1046,11 +1046,9 @@ class OGCWMTSFactory(BaseTilerFactory):
         async def web_map_tile_service(  # noqa: C901
             request: Request,
             api_params=Depends(self.path_dependency),
-            catalog_base64: str = 'https://test.com/my/stac/subcatalog',
+            catalog_path: str = '/',
         ):
-            # Retrieve catalog URL as base64 encoded string
-            catalog_url = decode_catalog_url(catalog_base64)
-
+            catalog_url = request.app.state.stac_url + catalog_path
             """OGC WMTS Service (KVP encoding)"""
             req = {k.lower(): v for k, v in request.query_params.items()}
 
@@ -1102,7 +1100,7 @@ class OGCWMTSFactory(BaseTilerFactory):
                     context={
                         "request": request,
                         "layers": [layer for k, layer in layers.items()],
-                        "service_url": self.url_for(request, "web_map_tile_service", catalog_base64=catalog_base64),
+                        "service_url": self.url_for(request, "web_map_tile_service", catalog_path=catalog_path),
                         "tilematrixsets": [
                             self.supported_tms.get(tms)
                             for tms in self.supported_tms.list()
