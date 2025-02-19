@@ -77,7 +77,7 @@
         <ows:Identifier>TIME</ows:Identifier>
         <Default>{{ layer.time[-1] }}</Default>
         {% for date in layer.time %}
-        <Value>{{ date }}</Value>
+        <Value>{{ date }}T00:00:00Z</Value>
         {% endfor %}
       {% else %}
         <Default>_empty</Default>

@@ -1049,6 +1049,7 @@ class OGCWMTSFactory(BaseTilerFactory):
             catalog_path: str = '/',
         ):
             catalog_url = request.app.state.stac_url + catalog_path
+            print("Catalog URL", catalog_url)
             """OGC WMTS Service (KVP encoding)"""
             req = {k.lower(): v for k, v in request.query_params.items()}
 

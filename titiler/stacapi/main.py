@@ -29,7 +29,7 @@ from titiler.stacapi.settings import ApiSettings, STACAPISettings
 from titiler.stacapi.utils import create_html_response
 
 settings = ApiSettings()
-stac_api_url = os.getenv("TITILER_STACAPI_STAC_API_URL", "https://dev.eodatahub.org.uk/api/catalogue/stac/")
+stac_api_url = os.getenv("TITILER_STACAPI_STAC_API_URL", "https://staging.eodatahub.org.uk/api/catalogue/stac/")
 stacapi_config = STACAPISettings(stac_api_url=stac_api_url)
 
 # custom template directory
