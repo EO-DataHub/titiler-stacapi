@@ -13,13 +13,6 @@ from morecantile import TileMatrixSet
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates, _TemplateResponse
 
-def encode_catalog_url(catalog_url: str) -> str:
-    return base64.urlsafe_b64encode(catalog_url.encode('utf-8')).decode('utf-8')
-
-
-def decode_catalog_url(encoded_catalog_url: str) -> str:
-    return base64.urlsafe_b64decode(encoded_catalog_url.encode('utf-8')).decode('utf-8').strip()
-
 
 def create_html_response(
     request: Request,
