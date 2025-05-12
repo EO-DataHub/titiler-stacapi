@@ -576,6 +576,7 @@ def get_layer_from_collections(  # noqa: C901
         temporal_extent = collection.extent.temporal
 
         if "renders" in collection.extra_fields:
+            print(f"Collection {collection.id} has renders")
             for name, render in collection.extra_fields["renders"].items():
 
                 tilematrixsets = render.pop("tilematrixsets", None)
@@ -633,15 +634,15 @@ def get_layer_from_collections(  # noqa: C901
                 if (
                     "cube:dimensions" in collection.extra_fields
                     and "time" in collection.extra_fields["cube:dimensions"]
+                    and "values" in collection.extra_fields["cube:dimensions"]["time"]
+                    and collection.extra_fields["cube:dimensions"]["time"]["values"]
                 ):
                     layer["time"] = [
                         python_datetime.datetime.strptime(
                             t,
                             "%Y-%m-%dT%H:%M:%SZ",
                         ).strftime("%Y-%m-%d")
-                        for t in collection.extra_fields["cube:dimensions"]["time"][
-                            "values"
-                        ]
+                        for t in collection.extra_fields["cube:dimensions"]["time"]["values"]
                     ]
                 elif intervals := temporal_extent.intervals:
                     start_date = intervals[0][0]
@@ -657,8 +658,10 @@ def get_layer_from_collections(  # noqa: C901
                         )
                         for x in range(0, (end_date - start_date).days + 1)
                     ]
-
                 render = layer["render"] or {}
+
+                if "variable" in render:
+                    continue
 
                 # special encoding for rescale
                 # Per Specification, the rescale entry is a 2d array in form of `[[min, max], [min,max]]`
@@ -1281,7 +1284,7 @@ class OGCWMTSFactory(BaseTilerFactory):
                 )
 
         @self.router.get(
-            "/layers/{LAYER}/{STYLE}/{TIME}/{TileMatrixSet}/{TileMatrix}/{TileCol}/{TileRow}.{FORMAT}",
+            "/layers/{LAYER}/{STYLE}/{timeId:path}/{TileMatrixSet}/{TileMatrix}/{TileCol}/{TileRow}.{FORMAT}",
             **img_endpoint_params,
         )
         def WMTS_getTile(
