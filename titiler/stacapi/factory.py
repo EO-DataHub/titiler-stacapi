@@ -670,7 +670,10 @@ def get_layer_from_collections(  # noqa: C901
                     rescales = []
                     for r in rescale:
                         if not isinstance(r, str):
-                            rescales.append(",".join(map(str, r)))
+                            try:
+                                rescales.append(",".join(map(str, r)))
+                            except:
+                                rescales.append(r)
                         else:
                             rescales.append(r)
 
@@ -689,6 +692,7 @@ def get_layer_from_collections(  # noqa: C901
                     doseq=True,
                 )
                 layer["query_string"] = str(qs)
+
 
                 layers[render_title] = LayerDict(
                     id=layer["id"],
@@ -1088,6 +1092,11 @@ class OGCWMTSFactory(BaseTilerFactory):
                 raise HTTPException(
                     status_code=400, detail="Missing WMTS 'REQUEST' parameter."
                 )
+
+            time = req.get("time")
+            if time:
+                time = time.split("T")[0]
+                req["time"] = time
 
             layers = get_layer_from_collections(
                 url=catalog_url,
