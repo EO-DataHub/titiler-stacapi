@@ -1042,11 +1042,10 @@ class OGCWMTSFactory(BaseTilerFactory):
                 ]
             },
         )
-
         async def web_map_tile_service(  # noqa: C901
             request: Request,
             api_params=Depends(self.path_dependency),
-            catalog_path: str = '/',
+            catalog_path: str = "/",
         ):
             catalog_url = request.app.state.stac_url + catalog_path
             """OGC WMTS Service (KVP encoding)"""
@@ -1100,7 +1099,9 @@ class OGCWMTSFactory(BaseTilerFactory):
                     context={
                         "request": request,
                         "layers": [layer for k, layer in layers.items()],
-                        "service_url": self.url_for(request, "web_map_tile_service", catalog_path=catalog_path),
+                        "service_url": self.url_for(
+                            request, "web_map_tile_service", catalog_path=catalog_path
+                        ),
                         "tilematrixsets": [
                             self.supported_tms.get(tms)
                             for tms in self.supported_tms.list()

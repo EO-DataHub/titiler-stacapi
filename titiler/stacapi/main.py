@@ -1,19 +1,19 @@
 """TiTiler+stacapi FastAPI application."""
 
 
+import os
 from typing import Any, Dict, List, Optional
 
 import jinja2
-import os
 from fastapi import Depends, FastAPI
 from fastapi.responses import ORJSONResponse
+from pystac_client import ItemSearch
+from pystac_client.stac_api_io import StacApiIO
 from starlette.middleware.cors import CORSMiddleware
 from starlette.requests import Request
 from starlette.templating import Jinja2Templates
 from typing_extensions import Annotated
 
-from pystac_client import ItemSearch
-from pystac_client.stac_api_io import StacApiIO
 from titiler.core.errors import DEFAULT_STATUS_CODES, add_exception_handlers
 from titiler.core.factory import AlgorithmFactory, MultiBaseTilerFactory, TMSFactory
 from titiler.core.middleware import CacheControlMiddleware, LoggerMiddleware
@@ -29,7 +29,9 @@ from titiler.stacapi.settings import ApiSettings, STACAPISettings
 from titiler.stacapi.utils import create_html_response
 
 settings = ApiSettings()
-stac_api_url = os.getenv("TITILER_STACAPI_STAC_API_URL", "https://dev.eodatahub.org.uk/api/catalogue/stac/")
+stac_api_url = os.getenv(
+    "TITILER_STACAPI_STAC_API_URL", "https://dev.eodatahub.org.uk/api/catalogue/stac/"
+)
 stacapi_config = STACAPISettings(stac_api_url=stac_api_url)
 
 # custom template directory
@@ -156,6 +158,7 @@ def ping() -> Dict:
 # Test get_assets
 @app.get("/get_assets", description="Get Assets", tags=["Get Assets"])
 def get_assets() -> Dict:
+    """Test function to get assets from a STAC API."""
     params = {
         "collections": ["sentinel2_ard"],
         "datetime": "2023-09-03T00:00:00Z/2023-09-04T00:00:00Z",
