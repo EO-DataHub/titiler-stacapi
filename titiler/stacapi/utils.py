@@ -4,7 +4,6 @@ Code from titiler.pgstac and titiler.cmr, MIT License.
 
 """
 
-import base64
 import re
 import time
 from typing import Any, List, Optional

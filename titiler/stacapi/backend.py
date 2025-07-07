@@ -178,7 +178,9 @@ class STACAPIBackend(BaseBackend):
         """This method is not used but is required by the abstract class."""
         pass
 
-    def assets_for_tile(self, catalog_url, x: int, y: int, z: int, **kwargs: Any) -> List[Dict]:
+    def assets_for_tile(
+        self, catalog_url, x: int, y: int, z: int, **kwargs: Any
+    ) -> List[Dict]:
         """Retrieve assets for tile."""
         bbox = self.tms.bounds(Tile(x, y, z))
         return self.get_assets(catalog_url, Polygon.from_bounds(*bbox), **kwargs)
@@ -219,7 +221,7 @@ class STACAPIBackend(BaseBackend):
 
         return self.get_assets(Polygon.from_bounds(xmin, ymin, xmax, ymax), **kwargs)
 
-    @cached(
+    @cached(  # type: ignore[misc]
         TTLCache(maxsize=cache_config.maxsize, ttl=cache_config.ttl),
         key=lambda self, catalog_url, geom, search_query=None, fields=None: hashkey(
             self.url,
